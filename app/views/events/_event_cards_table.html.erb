@@ -5,11 +5,15 @@
     <table>
       <thead>
       <tr>
-        <th>Cardholder</th>
-        <th>Number</th>
-        <th>Type</th>
-        <th>Status</th>
-        <th>Issued on</th>
+        <% @table_columns.each do |column| %>
+          <th<%= " class=\"text-right\"" if column[:right] %>>
+            <% if column[:sortable] == false %>
+              <%= column[:display] %>
+            <% else %>
+              <%= render "events/sort_table_header", sort: column[:key], display: column[:display], right: column[:right], default: column[:default] %>
+            <% end %>
+          </th>
+        <% end %>
       </tr>
       </thead>
       <tbody>
