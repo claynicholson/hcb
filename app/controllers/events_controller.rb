@@ -1060,7 +1060,7 @@ class EventsController < ApplicationController
 
   CARD_OVERVIEW_COLUMNS = [
     { key: "cardholder", display: "Cardholder", sql: "users.name" },
-    { key: "number", display: "Number", sortable: false },
+    { key: "last4", display: "Number" },
     { key: "card_type", display: "Type" },
     { key: "stripe_status", display: "Status" },
     { key: "created_at", display: "Issued on", default: true, right: true },
