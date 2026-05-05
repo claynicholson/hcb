@@ -380,11 +380,11 @@ module EventsHelper
   end
 
   def subevent_svg_graph(root, all_events)
-    node_w   = 160
-    node_h   = 36
-    h_gap    = 60  # horizontal gap between depth levels
-    v_gap    = 16  # vertical gap between sibling nodes
-    padding  = 24
+    node_w  = 160
+    node_h  = 36
+    h_gap   = 60
+    v_gap   = 16
+    padding = 24
 
     all_ids = all_events.map(&:id).to_set
 
@@ -395,26 +395,26 @@ module EventsHelper
     end
     children_of.each_value { |arr| arr.sort_by!(&:name) }
 
-    # Leaf-counter based layout (left-to-right):
-    # leaves get sequential y slots, parents center vertically over their children
-    leaf_counter = [0]
-    y_centers = {}
-
-    assign_y = lambda do |event|
+    # Count leaves in each subtree so we know how much vertical space each node needs
+    leaf_count = {}
+    count_leaves = lambda do |event|
       children = children_of[event.id]
-      if children.empty?
-        yc = padding + leaf_counter[0] * (node_h + v_gap) + node_h / 2.0
-        leaf_counter[0] += 1
-        y_centers[event.id] = yc
-        yc
-      else
-        child_ys = children.map { |c| assign_y.call(c) }
-        yc = (child_ys.min + child_ys.max) / 2.0
-        y_centers[event.id] = yc
-        yc
+      leaf_count[event.id] = children.empty? ? 1 : children.sum { |c| count_leaves.call(c) }
+    end
+    count_leaves.call(root)
+
+    # Top-aligned layout: parent sits at the top of its children group.
+    # y_tops maps event.id -> top y of that node's rect.
+    y_tops = {}
+    assign_y = lambda do |event, top|
+      y_tops[event.id] = top
+      cursor = top
+      children_of[event.id].each do |child|
+        assign_y.call(child, cursor)
+        cursor += leaf_count[child.id] * (node_h + v_gap)
       end
     end
-    assign_y.call(root)
+    assign_y.call(root, padding)
 
     depths = {}
     queue = [[root, 0]]
@@ -424,13 +424,13 @@ module EventsHelper
       children_of[event.id].each { |c| queue << [c, depth + 1] }
     end
 
-    num_leaves  = [leaf_counter[0], 1].max
-    max_depth   = depths.values.max || 0
-    svg_width   = (max_depth + 1) * (node_w + h_gap) - h_gap + 2 * padding
-    svg_height  = num_leaves * (node_h + v_gap) - v_gap + 2 * padding
+    num_leaves = leaf_count[root.id]
+    max_depth  = depths.values.max || 0
+    svg_width  = (max_depth + 1) * (node_w + h_gap) - h_gap + 2 * padding
+    svg_height = num_leaves * (node_h + v_gap) - v_gap + 2 * padding
 
     svg = []
-    svg << %(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{svg_width} #{svg_height}" width="#{svg_width}" height="#{svg_height}" style="display:block">)
+    svg << %(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{svg_width} #{svg_height}" style="display:block;width:100%;min-width:300px">)
     svg << <<~DEFS
       <defs>
         <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
@@ -438,13 +438,13 @@ module EventsHelper
         </marker>
       </defs>
       <style>
-        .node-rect        { fill: #fff; stroke: #ddd; transition: fill 0.15s, stroke 0.15s; }
-        .node-text        { fill: #000; font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
-        .root-text        { font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
-        .edge             { stroke: #aaa; }
-        .arrow-head       { fill: #aaa; }
-        a:hover .node-rect           { fill: #f0f0f0; stroke: #bbb; }
-        a:hover .root-rect           { fill: #d42f47; }
+        .node-rect  { fill: #fff; stroke: #ddd; transition: fill 0.15s, stroke 0.15s; }
+        .node-text  { fill: #000; font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
+        .root-text  { fill: #fff; font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
+        .edge       { stroke: #aaa; }
+        .arrow-head { fill: #aaa; }
+        a:hover .node-rect { fill: #f0f0f0; stroke: #bbb; }
+        a:hover .root-rect { fill: #d42f47; }
         [data-dark='true'] .node-rect         { fill: #2a2a2f; stroke: #444; }
         [data-dark='true'] .node-text         { fill: #fff; }
         [data-dark='true'] .edge              { stroke: #555; }
@@ -452,44 +452,37 @@ module EventsHelper
         [data-dark='true'] a:hover .node-rect { fill: #3a3a40; stroke: #666; }
         [data-dark='true'] a:hover .root-rect { fill: #d42f47; }
       </style>
-        [data-dark='true'] .arrow-head { fill: #555; }
-      </style>
     DEFS
 
-    # Edges (right edge of parent -> left edge of child)
+    # Edges: right-center of parent -> left-center of child
     all_events.each do |event|
       next if children_of[event.id].empty?
       ex = padding + depths[event.id] * (node_w + h_gap) + node_w
-      ey = y_centers[event.id].round
+      ey = y_tops[event.id] + node_h / 2
       children_of[event.id].each do |child|
         cx2 = padding + depths[child.id] * (node_w + h_gap)
-        cy2 = y_centers[child.id].round
+        cy2 = y_tops[child.id] + node_h / 2
         svg << %(<line class="edge" x1="#{ex}" y1="#{ey}" x2="#{cx2}" y2="#{cy2}" stroke-width="1.5" marker-end="url(#arr)"/>)
       end
     end
 
     # Nodes
     all_events.each do |event|
-      yc    = y_centers[event.id]
-      x     = padding + depths[event.id] * (node_w + h_gap)
-      y     = (yc - node_h / 2.0).round
+      x       = padding + depths[event.id] * (node_w + h_gap)
+      y       = y_tops[event.id]
+      cx      = x + node_w / 2
+      cy      = y + node_h / 2
       is_root = event.id == root.id
 
-      rect_class  = is_root ? %( class="root-rect") : %( class="node-rect")
-      text_class  = is_root ? %( class="root-text") : %( class="node-text")
-      fill        = is_root ? "#ec3750" : nil
-      stroke      = is_root ? "#c0392b" : nil
-      text_fill   = is_root ? "white" : nil
-      fill_attr   = fill   ? %( fill="#{fill}")   : ""
-      stroke_attr = stroke ? %( stroke="#{stroke}") : ""
-      text_fill_attr = text_fill ? %( fill="#{text_fill}") : ""
-      rx          = is_root ? "18" : "6"
-      href        = is_root ? event_sub_organizations_path(root) : event_path(event)
-      label       = event.name.length > 21 ? "#{event.name.first(20)}…" : event.name
+      rect_attrs = is_root ? %( class="root-rect" fill="#ec3750" stroke="#c0392b") : %( class="node-rect")
+      text_class = is_root ? "root-text" : "node-text"
+      rx         = is_root ? "18" : "6"
+      href       = is_root ? event_sub_organizations_path(root) : event_path(event)
+      label      = event.name.length > 21 ? "#{event.name.first(20)}…" : event.name
 
       svg << %(<a href="#{h(href)}" title="#{h(event.name)}">)
-      svg << %(<rect#{rect_class} x="#{x}" y="#{y}" width="#{node_w}" height="#{node_h}" rx="#{rx}"#{fill_attr}#{stroke_attr} stroke-width="2"/>)
-      svg << %(<text#{text_class} x="#{x + node_w / 2}" y="#{(yc).round}" text-anchor="middle" dominant-baseline="central"#{text_fill_attr}>#{h(label)}</text>)
+      svg << %(<rect#{rect_attrs} x="#{x}" y="#{y}" width="#{node_w}" height="#{node_h}" rx="#{rx}" stroke-width="2"/>)
+      svg << %(<text class="#{text_class}" x="#{cx}" y="#{cy}" text-anchor="middle" dominant-baseline="central">#{h(label)}</text>)
       svg << %(</a>)
     end
 
