@@ -439,8 +439,8 @@ module EventsHelper
       </defs>
       <style>
         .node-rect  { fill: #fff; stroke: #ddd; transition: fill 0.15s, stroke 0.15s; }
-        .node-text  { fill: #000; font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
-        .root-text  { fill: #fff; font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
+        .node-text  { fill: #000; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; }
+        .root-text  { fill: #fff; font-size: 15px; font-family: system-ui, -apple-system, sans-serif; }
         .edge       { stroke: #aaa; }
         .arrow-head { fill: #aaa; }
         a { outline: none; }
