@@ -430,7 +430,7 @@ module EventsHelper
     svg_height  = num_leaves * (node_h + v_gap) - v_gap + 2 * padding
 
     svg = []
-    svg << %(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{svg_width} #{svg_height}" style="min-width:300px;width:100%">)
+    svg << %(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{svg_width} #{svg_height}" width="#{svg_width}" height="#{svg_height}" style="display:block">)
     svg << <<~DEFS
       <defs>
         <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
