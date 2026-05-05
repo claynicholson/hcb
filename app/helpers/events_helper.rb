@@ -438,14 +438,20 @@ module EventsHelper
         </marker>
       </defs>
       <style>
-        .node-rect        { fill: #fff; stroke: #ddd; }
+        .node-rect        { fill: #fff; stroke: #ddd; transition: fill 0.15s, stroke 0.15s; }
         .node-text        { fill: #000; font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
         .root-text        { font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
         .edge             { stroke: #aaa; }
         .arrow-head       { fill: #aaa; }
-        [data-dark='true'] .node-rect  { fill: #2a2a2f; stroke: #444; }
-        [data-dark='true'] .node-text  { fill: #fff; }
-        [data-dark='true'] .edge       { stroke: #555; }
+        a:hover .node-rect           { fill: #f0f0f0; stroke: #bbb; }
+        a:hover .root-rect           { fill: #d42f47; }
+        [data-dark='true'] .node-rect         { fill: #2a2a2f; stroke: #444; }
+        [data-dark='true'] .node-text         { fill: #fff; }
+        [data-dark='true'] .edge              { stroke: #555; }
+        [data-dark='true'] .arrow-head        { fill: #555; }
+        [data-dark='true'] a:hover .node-rect { fill: #3a3a40; stroke: #666; }
+        [data-dark='true'] a:hover .root-rect { fill: #d42f47; }
+      </style>
         [data-dark='true'] .arrow-head { fill: #555; }
       </style>
     DEFS
@@ -469,7 +475,7 @@ module EventsHelper
       y     = (yc - node_h / 2.0).round
       is_root = event.id == root.id
 
-      rect_class  = is_root ? "" : %( class="node-rect")
+      rect_class  = is_root ? %( class="root-rect") : %( class="node-rect")
       text_class  = is_root ? %( class="root-text") : %( class="node-text")
       fill        = is_root ? "#ec3750" : nil
       stroke      = is_root ? "#c0392b" : nil
