@@ -434,9 +434,19 @@ module EventsHelper
     svg << <<~DEFS
       <defs>
         <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
-          <polygon points="0 0,8 3,0 6" fill="#aaa"/>
+          <polygon class="arrow-head" points="0 0,8 3,0 6"/>
         </marker>
       </defs>
+      <style>
+        .node-rect        { fill: #fff; stroke: #ddd; }
+        .node-text        { fill: #000; }
+        .edge             { stroke: #aaa; }
+        .arrow-head       { fill: #aaa; }
+        [data-dark='true'] .node-rect  { fill: #2a2a2f; stroke: #444; }
+        [data-dark='true'] .node-text  { fill: #fff; }
+        [data-dark='true'] .edge       { stroke: #555; }
+        [data-dark='true'] .arrow-head { fill: #555; }
+      </style>
     DEFS
 
     # Edges (right edge of parent -> left edge of child)
@@ -447,7 +457,7 @@ module EventsHelper
       children_of[event.id].each do |child|
         cx2 = padding + depths[child.id] * (node_w + h_gap)
         cy2 = y_centers[child.id].round
-        svg << %(<line x1="#{ex}" y1="#{ey}" x2="#{cx2}" y2="#{cy2}" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/>)
+        svg << %(<line class="edge" x1="#{ex}" y1="#{ey}" x2="#{cx2}" y2="#{cy2}" stroke-width="1.5" marker-end="url(#arr)"/>)
       end
     end
 
@@ -458,16 +468,21 @@ module EventsHelper
       y     = (yc - node_h / 2.0).round
       is_root = event.id == root.id
 
-      fill        = is_root ? "#ec3750" : "white"
-      stroke      = is_root ? "#c0392b" : "#ddd"
-      text_fill   = is_root ? "white" : "black"
+      rect_class  = is_root ? "" : %( class="node-rect")
+      text_class  = is_root ? "" : %( class="node-text")
+      fill        = is_root ? "#ec3750" : nil
+      stroke      = is_root ? "#c0392b" : nil
+      text_fill   = is_root ? "white" : nil
+      fill_attr   = fill   ? %( fill="#{fill}")   : ""
+      stroke_attr = stroke ? %( stroke="#{stroke}") : ""
+      text_fill_attr = text_fill ? %( fill="#{text_fill}") : ""
       rx          = is_root ? "18" : "6"
       href        = is_root ? event_sub_organizations_path(root) : event_path(event)
       label       = event.name.length > 21 ? "#{event.name.first(20)}…" : event.name
 
       svg << %(<a href="#{h(href)}" title="#{h(event.name)}">)
-      svg << %(<rect x="#{x}" y="#{y}" width="#{node_w}" height="#{node_h}" rx="#{rx}" fill="#{fill}" stroke="#{stroke}" stroke-width="2"/>)
-      svg << %(<text x="#{x + node_w / 2}" y="#{(yc).round}" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-size="12" fill="#{text_fill}">#{h(label)}</text>)
+      svg << %(<rect#{rect_class} x="#{x}" y="#{y}" width="#{node_w}" height="#{node_h}" rx="#{rx}"#{fill_attr}#{stroke_attr} stroke-width="2"/>)
+      svg << %(<text#{text_class} x="#{x + node_w / 2}" y="#{(yc).round}" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-size="12"#{text_fill_attr}>#{h(label)}</text>)
       svg << %(</a>)
     end
 
