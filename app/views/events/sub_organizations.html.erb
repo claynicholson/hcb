@@ -47,6 +47,12 @@
   <%= blankslate "No sub-organizations yet" %>
 <% end %>
 
+<% if @all_events.length > 1 %>
+  <div class="card my-3" style="overflow-x: auto;">
+    <%= subevent_svg_graph(@event, @all_events) %>
+  </div>
+<% end %>
+
 <% if policy(@event).create_sub_organization? %>
   <section data-behavior="modal" role="dialog" id="create" class="modal modal--scroll bg-snow">
     <%= modal_header "Create a sub-organization" %>

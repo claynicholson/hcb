@@ -379,4 +379,99 @@ module EventsHelper
     end
   end
 
+  def subevent_svg_graph(root, all_events)
+    children_map = Hash.new { |h, k| h[k] = [] }
+    event_map = all_events.index_by(&:id)
+
+    all_events.each do |e|
+      next if e.id == root.id
+      children_map[e.parent_id] << e.id if event_map.key?(e.parent_id)
+    end
+
+    node_w = 180
+    node_h = 36
+    h_gap = 16
+    v_gap = 64
+
+    # Calculate subtree width in "slots" so we can center parents over children
+    subtree_slots = {}
+    calc_slots = lambda do |id|
+      kids = children_map[id]
+      subtree_slots[id] = kids.empty? ? 1 : kids.sum { |k| calc_slots.call(k) }
+    end
+    calc_slots.call(root.id)
+
+    slot_width = node_w + h_gap
+    positions = {}
+    queue = [[root.id, 0, 0]]
+
+    until queue.empty?
+      id, level, left = queue.shift
+      center_x = left + (subtree_slots[id] * slot_width - h_gap) / 2.0
+      positions[id] = [center_x - node_w / 2.0, level * (node_h + v_gap)]
+      child_left = left
+      children_map[id].each do |kid|
+        queue << [kid, level + 1, child_left]
+        child_left += subtree_slots[kid] * slot_width
+      end
+    end
+
+    xs = positions.values.map(&:first)
+    ys = positions.values.map(&:last)
+    min_x = xs.min
+    offset_x = min_x < 10 ? (10 - min_x) : 0
+    svg_w = (xs.max + node_w + offset_x + 20).ceil
+    svg_h = (ys.max + node_h + 20).ceil
+
+    parts = []
+    parts << %(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{svg_w} #{svg_h}" style="width:100%;height:auto;display:block;">)
+    parts << %(<defs>)
+    parts << %(<marker id="hcb-arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#aaa" class="svg-arrow-head"/></marker>)
+    parts << %(<style>)
+    parts << %(.svg-edge{stroke:#aaa;stroke-width:2;fill:none})
+    parts << %(.svg-node-child rect{fill:#fff;stroke:#ddd;stroke-width:1.5})
+    parts << %(.svg-node-child text{fill:#1a1a1a;font-family:system-ui,-apple-system,sans-serif;font-size:13px})
+    parts << %(.svg-node-root rect{fill:#ec3750;stroke:#c0392b;stroke-width:2})
+    parts << %(.svg-node-root text{fill:#fff;font-family:system-ui,-apple-system,sans-serif;font-size:13px;font-weight:600})
+    parts << %([data-dark='true'] .svg-node-child rect{fill:#2a2a2f;stroke:rgba(255,255,255,0.15)})
+    parts << %([data-dark='true'] .svg-node-child text{fill:#e0e0e0})
+    parts << %([data-dark='true'] .svg-edge{stroke:rgba(255,255,255,0.25)})
+    parts << %([data-dark='true'] .svg-arrow-head{fill:rgba(255,255,255,0.25)})
+    parts << %(</style>)
+    parts << %(</defs>)
+
+    # Edges
+    positions.each do |id, (x, y)|
+      rx = x + offset_x
+      children_map[id].each do |kid|
+        kx, ky = positions[kid]
+        krx = kx + offset_x
+        parts << %(<line class="svg-edge" x1="#{(rx + node_w / 2.0).round(1)}" y1="#{(y + node_h).round(1)}" x2="#{(krx + node_w / 2.0).round(1)}" y2="#{ky.round(1)}" marker-end="url(#hcb-arr)"/>)
+      end
+    end
+
+    # Nodes
+    positions.each do |id, (x, y)|
+      event = event_map[id]
+      rx = (x + offset_x).round(1)
+      ry = y.round(1)
+      is_root = id == root.id
+      css_class = is_root ? "svg-node-root" : "svg-node-child"
+      href = CGI.escapeHTML(is_root ? event_sub_organizations_path(root) : event_path(event))
+      label = CGI.escapeHTML(event.name.to_s.truncate(24))
+      cx = (rx + node_w / 2.0).round(1)
+      cy = (ry + node_h / 2.0 + 4.5).round(1)
+      title = CGI.escapeHTML(event.name.to_s)
+
+      parts << %(<a href="#{href}" class="#{css_class}">)
+      parts << %(<title>#{title}</title>)
+      parts << %(<rect x="#{rx}" y="#{ry}" width="#{node_w}" height="#{node_h}" rx="18"/>)
+      parts << %(<text x="#{cx}" y="#{cy}" text-anchor="middle">#{label}</text>)
+      parts << %(</a>)
+    end
+
+    parts << %(</svg>)
+    parts.join.html_safe
+  end
+
 end
