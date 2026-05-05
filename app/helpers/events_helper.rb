@@ -439,7 +439,8 @@ module EventsHelper
       </defs>
       <style>
         .node-rect        { fill: #fff; stroke: #ddd; }
-        .node-text        { fill: #000; }
+        .node-text        { fill: #000; font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
+        .root-text        { font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
         .edge             { stroke: #aaa; }
         .arrow-head       { fill: #aaa; }
         [data-dark='true'] .node-rect  { fill: #2a2a2f; stroke: #444; }
@@ -469,7 +470,7 @@ module EventsHelper
       is_root = event.id == root.id
 
       rect_class  = is_root ? "" : %( class="node-rect")
-      text_class  = is_root ? "" : %( class="node-text")
+      text_class  = is_root ? %( class="root-text") : %( class="node-text")
       fill        = is_root ? "#ec3750" : nil
       stroke      = is_root ? "#c0392b" : nil
       text_fill   = is_root ? "white" : nil
@@ -482,7 +483,7 @@ module EventsHelper
 
       svg << %(<a href="#{h(href)}" title="#{h(event.name)}">)
       svg << %(<rect#{rect_class} x="#{x}" y="#{y}" width="#{node_w}" height="#{node_h}" rx="#{rx}"#{fill_attr}#{stroke_attr} stroke-width="2"/>)
-      svg << %(<text#{text_class} x="#{x + node_w / 2}" y="#{(yc).round}" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-size="12"#{text_fill_attr}>#{h(label)}</text>)
+      svg << %(<text#{text_class} x="#{x + node_w / 2}" y="#{(yc).round}" text-anchor="middle" dominant-baseline="central"#{text_fill_attr}>#{h(label)}</text>)
       svg << %(</a>)
     end
 
