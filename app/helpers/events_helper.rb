@@ -443,14 +443,23 @@ module EventsHelper
         .root-text  { fill: #fff; font-size: 13px; font-family: system-ui, -apple-system, sans-serif; }
         .edge       { stroke: #aaa; }
         .arrow-head { fill: #aaa; }
-        a:hover .node-rect { fill: #f0f0f0; stroke: #bbb; }
-        a:hover .root-rect { fill: #d42f47; }
-        [data-dark='true'] .node-rect         { fill: #2a2a2f; stroke: #444; }
-        [data-dark='true'] .node-text         { fill: #fff; }
-        [data-dark='true'] .edge              { stroke: #555; }
-        [data-dark='true'] .arrow-head        { fill: #555; }
-        [data-dark='true'] a:hover .node-rect { fill: #3a3a40; stroke: #666; }
-        [data-dark='true'] a:hover .root-rect { fill: #d42f47; }
+        a { outline: none; }
+        a:hover .node-rect,
+        a:focus .node-rect  { fill: #f0f0f0; stroke: #6366f1; stroke-width: 2; }
+        a:hover .root-rect,
+        a:focus .root-rect  { fill: #d42f47; stroke: #a5b4fc; }
+        a:active .node-rect { fill: #e0e0e0; stroke: #4338ca; }
+        a:active .root-rect { fill: #b02030; stroke: #4338ca; }
+        [data-dark='true'] .node-rect           { fill: #2a2a2f; stroke: #444; }
+        [data-dark='true'] .node-text           { fill: #fff; }
+        [data-dark='true'] .edge                { stroke: #555; }
+        [data-dark='true'] .arrow-head          { fill: #555; }
+        [data-dark='true'] a:hover .node-rect,
+        [data-dark='true'] a:focus .node-rect   { fill: #3a3a40; stroke: #6366f1; }
+        [data-dark='true'] a:hover .root-rect,
+        [data-dark='true'] a:focus .root-rect   { fill: #d42f47; stroke: #a5b4fc; }
+        [data-dark='true'] a:active .node-rect  { fill: #1a1a1f; stroke: #4338ca; }
+        [data-dark='true'] a:active .root-rect  { fill: #b02030; stroke: #4338ca; }
       </style>
     DEFS
 
