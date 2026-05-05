@@ -382,12 +382,11 @@ module EventsHelper
   def subevent_svg_graph(root, all_events)
     node_w   = 160
     node_h   = 36
-    h_gap    = 24
-    v_gap    = 60
+    h_gap    = 60  # horizontal gap between depth levels
+    v_gap    = 16  # vertical gap between sibling nodes
     padding  = 24
 
     all_ids = all_events.map(&:id).to_set
-    event_by_id = all_events.index_by(&:id)
 
     children_of = Hash.new { |h, k| h[k] = [] }
     all_events.each do |e|
@@ -396,25 +395,26 @@ module EventsHelper
     end
     children_of.each_value { |arr| arr.sort_by!(&:name) }
 
-    # Leaf-counter based x layout: leaves get sequential slots, parents center over children
+    # Leaf-counter based layout (left-to-right):
+    # leaves get sequential y slots, parents center vertically over their children
     leaf_counter = [0]
-    x_centers = {}
+    y_centers = {}
 
-    assign_x = lambda do |event|
+    assign_y = lambda do |event|
       children = children_of[event.id]
       if children.empty?
-        x = padding + leaf_counter[0] * (node_w + h_gap) + node_w / 2.0
+        yc = padding + leaf_counter[0] * (node_h + v_gap) + node_h / 2.0
         leaf_counter[0] += 1
-        x_centers[event.id] = x
-        x
+        y_centers[event.id] = yc
+        yc
       else
-        child_xs = children.map { |c| assign_x.call(c) }
-        cx = (child_xs.min + child_xs.max) / 2.0
-        x_centers[event.id] = cx
-        cx
+        child_ys = children.map { |c| assign_y.call(c) }
+        yc = (child_ys.min + child_ys.max) / 2.0
+        y_centers[event.id] = yc
+        yc
       end
     end
-    assign_x.call(root)
+    assign_y.call(root)
 
     depths = {}
     queue = [[root, 0]]
@@ -426,8 +426,8 @@ module EventsHelper
 
     num_leaves  = [leaf_counter[0], 1].max
     max_depth   = depths.values.max || 0
-    svg_width   = num_leaves * (node_w + h_gap) - h_gap + 2 * padding
-    svg_height  = (max_depth + 1) * (node_h + v_gap) - v_gap + 2 * padding
+    svg_width   = (max_depth + 1) * (node_w + h_gap) - h_gap + 2 * padding
+    svg_height  = num_leaves * (node_h + v_gap) - v_gap + 2 * padding
 
     svg = []
     svg << %(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{svg_width} #{svg_height}" style="min-width:300px;width:100%">)
@@ -439,23 +439,23 @@ module EventsHelper
       </defs>
     DEFS
 
-    # Edges
+    # Edges (right edge of parent -> left edge of child)
     all_events.each do |event|
       next if children_of[event.id].empty?
-      px = x_centers[event.id].round
-      py = padding + depths[event.id] * (node_h + v_gap) + node_h
+      ex = padding + depths[event.id] * (node_w + h_gap) + node_w
+      ey = y_centers[event.id].round
       children_of[event.id].each do |child|
-        cx2 = x_centers[child.id].round
-        cy2 = padding + depths[child.id] * (node_h + v_gap)
-        svg << %(<line x1="#{px}" y1="#{py}" x2="#{cx2}" y2="#{cy2}" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/>)
+        cx2 = padding + depths[child.id] * (node_w + h_gap)
+        cy2 = y_centers[child.id].round
+        svg << %(<line x1="#{ex}" y1="#{ey}" x2="#{cx2}" y2="#{cy2}" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/>)
       end
     end
 
     # Nodes
     all_events.each do |event|
-      cx    = x_centers[event.id]
-      y     = padding + depths[event.id] * (node_h + v_gap)
-      x     = (cx - node_w / 2.0).round
+      yc    = y_centers[event.id]
+      x     = padding + depths[event.id] * (node_w + h_gap)
+      y     = (yc - node_h / 2.0).round
       is_root = event.id == root.id
 
       fill        = is_root ? "#ec3750" : "white"
@@ -467,7 +467,7 @@ module EventsHelper
 
       svg << %(<a href="#{h(href)}" title="#{h(event.name)}">)
       svg << %(<rect x="#{x}" y="#{y}" width="#{node_w}" height="#{node_h}" rx="#{rx}" fill="#{fill}" stroke="#{stroke}" stroke-width="2"/>)
-      svg << %(<text x="#{cx.round}" y="#{(y + node_h / 2.0).round}" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-size="12" fill="#{text_fill}">#{h(label)}</text>)
+      svg << %(<text x="#{x + node_w / 2}" y="#{(yc).round}" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-size="12" fill="#{text_fill}">#{h(label)}</text>)
       svg << %(</a>)
     end
 
