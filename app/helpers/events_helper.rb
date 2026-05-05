@@ -379,4 +379,100 @@ module EventsHelper
     end
   end
 
+  def subevent_svg_graph(root, all_events)
+    node_w   = 160
+    node_h   = 36
+    h_gap    = 24
+    v_gap    = 60
+    padding  = 24
+
+    all_ids = all_events.map(&:id).to_set
+    event_by_id = all_events.index_by(&:id)
+
+    children_of = Hash.new { |h, k| h[k] = [] }
+    all_events.each do |e|
+      next if e.id == root.id
+      children_of[e.parent_id] << e if all_ids.include?(e.parent_id)
+    end
+    children_of.each_value { |arr| arr.sort_by!(&:name) }
+
+    # Leaf-counter based x layout: leaves get sequential slots, parents center over children
+    leaf_counter = [0]
+    x_centers = {}
+
+    assign_x = lambda do |event|
+      children = children_of[event.id]
+      if children.empty?
+        x = padding + leaf_counter[0] * (node_w + h_gap) + node_w / 2.0
+        leaf_counter[0] += 1
+        x_centers[event.id] = x
+        x
+      else
+        child_xs = children.map { |c| assign_x.call(c) }
+        cx = (child_xs.min + child_xs.max) / 2.0
+        x_centers[event.id] = cx
+        cx
+      end
+    end
+    assign_x.call(root)
+
+    depths = {}
+    queue = [[root, 0]]
+    until queue.empty?
+      event, depth = queue.shift
+      depths[event.id] = depth
+      children_of[event.id].each { |c| queue << [c, depth + 1] }
+    end
+
+    num_leaves  = [leaf_counter[0], 1].max
+    max_depth   = depths.values.max || 0
+    svg_width   = num_leaves * (node_w + h_gap) - h_gap + 2 * padding
+    svg_height  = (max_depth + 1) * (node_h + v_gap) - v_gap + 2 * padding
+
+    svg = []
+    svg << %(<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 #{svg_width} #{svg_height}" style="min-width:300px;width:100%">)
+    svg << <<~DEFS
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+          <polygon points="0 0,8 3,0 6" fill="#aaa"/>
+        </marker>
+      </defs>
+    DEFS
+
+    # Edges
+    all_events.each do |event|
+      next if children_of[event.id].empty?
+      px = x_centers[event.id].round
+      py = padding + depths[event.id] * (node_h + v_gap) + node_h
+      children_of[event.id].each do |child|
+        cx2 = x_centers[child.id].round
+        cy2 = padding + depths[child.id] * (node_h + v_gap)
+        svg << %(<line x1="#{px}" y1="#{py}" x2="#{cx2}" y2="#{cy2}" stroke="#aaa" stroke-width="1.5" marker-end="url(#arr)"/>)
+      end
+    end
+
+    # Nodes
+    all_events.each do |event|
+      cx    = x_centers[event.id]
+      y     = padding + depths[event.id] * (node_h + v_gap)
+      x     = (cx - node_w / 2.0).round
+      is_root = event.id == root.id
+
+      fill        = is_root ? "#ec3750" : "white"
+      stroke      = is_root ? "#c0392b" : "#ddd"
+      text_fill   = is_root ? "white" : "black"
+      rx          = is_root ? "18" : "6"
+      href        = is_root ? event_sub_organizations_path(root) : event_path(event)
+      label       = event.name.length > 21 ? "#{event.name.first(20)}…" : event.name
+
+      svg << %(<a href="#{h(href)}" title="#{h(event.name)}">)
+      svg << %(<rect x="#{x}" y="#{y}" width="#{node_w}" height="#{node_h}" rx="#{rx}" fill="#{fill}" stroke="#{stroke}" stroke-width="2"/>)
+      svg << %(<text x="#{cx.round}" y="#{(y + node_h / 2.0).round}" text-anchor="middle" dominant-baseline="central" font-family="system-ui,sans-serif" font-size="12" fill="#{text_fill}">#{h(label)}</text>)
+      svg << %(</a>)
+    end
+
+    svg << %(</svg>)
+    svg.join("\n").html_safe
+  end
+
 end

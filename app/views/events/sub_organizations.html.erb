@@ -30,6 +30,12 @@
   </div>
 </div>
 
+<% if @all_events.length > 1 %>
+  <div class="card my-3" style="overflow-x: auto;">
+    <%= subevent_svg_graph(@event, @all_events) %>
+  </div>
+<% end %>
+
 <div class="flex items-center gap-6 sm:gap-4 flex-col-reverse sm:flex-row mb-2">
   <%= form_with(model: false, local: true, method: :get, class: "flex-1 w-full sm:w-auto") do |form| %>
     <%= render "events/filters/search", form: %>
