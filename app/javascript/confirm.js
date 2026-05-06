@@ -13,8 +13,13 @@ function showConfirm(
   }).then(v => !!v)
 }
 
-Turbo.config.forms.confirm = message =>
-  showConfirm(message, { dangerMode: true })
+Turbo.config.forms.confirm = (message, element, submitter) => {
+  const isDangerous =
+    element?.method?.toLowerCase() === 'delete' ||
+    submitter?.dataset?.turboConfirmDanger != null ||
+    element?.dataset?.turboConfirmDanger != null
+  return showConfirm(message, { dangerMode: isDangerous })
+}
 window.showConfirm = showConfirm
 window.swal = swal
 

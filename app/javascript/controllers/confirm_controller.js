@@ -18,6 +18,8 @@ export default class extends Controller {
 
     if (event.type === 'click') event.preventDefault()
 
+    const form = event.target.closest('form') || this.element.closest('form')
+
     const confirmed = await showConfirm(this.messageValue, {
       title: this.titleValue,
       confirmText: this.confirmTextValue,
@@ -36,6 +38,6 @@ export default class extends Controller {
       if (checkbox) checkbox.checked = true
     }
 
-    this.element.closest('form')?.requestSubmit()
+    form?.requestSubmit()
   }
 }
