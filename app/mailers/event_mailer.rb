@@ -93,7 +93,7 @@ class EventMailer < ApplicationMailer
     @whodunnit = params[:whodunnit]
 
     # Not using role_at_least? because we want this to be false for HCB admins
-    @is_manager = @event.ancestor_organizer_positions.map(&:user).include?(@whodunnit)
+    @is_manager = @event.self_and_ancestor_organizer_positions.map(&:user).include?(@whodunnit)
   end
 
 end
