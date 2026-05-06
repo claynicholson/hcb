@@ -150,64 +150,69 @@ Organizations can now set up donation tiers (think: "Bronze/Silver/Gold"), each 
 ### 10. Sign contracts directly inside HCB
 Organizations can now sign their fiscal sponsorship contract from inside HCB — no more DocuSign round-trip to get started.
 - **Author:** @polypixeldev
-- **PR:** #12377
+- **PRs:** #12377 (core), #12422 (party notifications), #12581 (signing-page FAQ), #11394 (admin can resend contracts), #11767 (financially_frozen until signed), #11677 (DocuSeal template per plan), #12745 (project description as signee field), #10370 (per-plan signature requirements)
 
-### 11. Statement of Activity: professional accounting reports
+### 11. In-platform applications: apply to HCB without leaving HCB
+The application to become fiscally sponsored by HCB now lives natively inside the product instead of an external Airtable form. Applicants get a guided multi-step flow with onboarding videos, country eligibility checks, contract signing, cosigner support, ready-to-submit validation, and a clean rejection/unarchive path. Admins get richer review tools and Airtable still receives a synced copy.
+- **Authors:** @YodaLightsabr, @polypixeldev, @manuthecoder
+- **PRs:** #12188 (core in-platform applications), #12430 (layout improvements), #12928 / #12951 / #12993 (post-launch feedback fixes), #13070 / #13080 / #13102 / #13125 (country restrictions + rejection messaging), #13324 / #13337 (onboarding videos + watch tracking), #13181 (unarchiving), #13169 (referral code prefill), #13283 (point-of-contact assignment), #13023 (lock the form after submission), #13090 / #13097 (one-click activation when contract signed), #13335 (admin info), #13456 (clarify teen agreement signing), #13457 (prefill previously-applied field), #12981 (link to associated event)
+
+### 12. Statement of Activity: professional accounting reports
 A proper Statement of Activity report for organizations, with detailed category-by-category transaction views and XLSX export. Auditors can view it too.
 - **Authors:** @garyhtou, @manuthecoder, @polypixeldev, @YodaLightsabr
 - **PRs:** #11437 (alpha), #11541 (XLSX), #11586 (auditor access), #13395 (detailed view), #13398–#13404 (automated accounting categorization for disbursements, transfers, card grants)
 
-### 12. Automatic logout after inactivity
+### 13. Automatic logout after inactivity
 Sessions now expire after a period of inactivity (max two weeks), protecting accounts where a device is left signed in.
 - **Author:** @Luke-Oldenburg
 - **PR:** #11596
 
-### 13. Second factor required to enable 2FA
+### 14. Second factor required to enable 2FA
 Setting up two-factor authentication now requires a second authentication factor first — closing a gap where a compromised session could enable 2FA and lock out the real user.
 - **Author:** @sampoder
 - **PR:** #12441 (plus #12371, disallow SMS as the only factor for fresh users)
 
-### 14. Sudo Mode with security keys for sensitive actions
+### 15. Sudo Mode with security keys for sensitive actions
 HCB now enters a "sudo mode" re-authentication for high-value actions — ACH, wires, and checks over $500, plus any time you view full card details. WebAuthn (hardware security keys / Face ID / Windows Hello) is fully supported as a factor.
 - **Authors:** @davidcornu, @sampoder
 - **PRs:** #11048 (WebAuthn), #11133 (ACH), #11135 (wires), #11142 (checks), #11156 (card details), #12621 (direct uploads)
 
-### 15. Refer new teenagers, climb the leaderboard
+### 16. Refer new teenagers, climb the leaderboard
 Teenagers can create personal referral links to invite new users, with custom redirect destinations. A live leaderboard ranks top referrers.
 - **Authors:** @YodaLightsabr, @Luke-Oldenburg
 - **PRs:** #12323, #12324, #12330 (leaderboard)
 
-### 16. Teen Perks expansion
+### 17. Teen Perks expansion
 A major expansion of teen-only perks — any organization with at least one teen member can see and redeem perks, there's a teen fee waiver for eligible teen-run orgs, and an active-teen leaderboard.
 - **Author:** @Luke-Oldenburg
 - **PRs:** #11547 (perks visibility), #11742 (fee waiver), #11612 (leaderboard)
 
-### 17. Document preview in your browser
+### 18. Document preview in your browser
 Receipt and attachment files (CSVs, Word docs, and more) now preview inline in HCB instead of forcing a download.
 - **Author:** @sampoder
 - **PR:** #11127
 
-### 18. Balance graph
+### 19. Balance graph
 A beautiful balance-over-time graph on your organization dashboard, letting you see cash position at a glance.
 - **Author:** @manuthecoder
 - **PR:** #13137
 
-### 19. Tap to Pay support
+### 20. Tap to Pay support
 Groundwork for paying in person by tapping a physical or virtual HCB card at a supported terminal, via a new payment intent route.
 - **Author:** @Mohamad-Mortada
 - **PR:** #13206
 
-### 20. Cancel recurring donations
+### 21. Cancel recurring donations
 Organization managers can now cancel recurring donations from within HCB — previously this required a support ticket.
 - **Author:** @rluodev
 - **PR:** #11436
 
-### 21. Donation goal reached: a celebratory email
+### 22. Donation goal reached: a celebratory email
 When your organization hits its donation goal, everyone on the team gets an email announcing it.
 - **Author:** @polypixeldev
 - **PR:** #10723
 
-### 22. Atom feeds and follow for organization announcements
+### 23. Atom feeds and follow for organization announcements
 Complementary to organization announcements themselves: users can "follow" announcements to get a monthly digest email, and every org's announcements are also available as an Atom feed for RSS readers.
 - **Authors:** @Luke-Oldenburg, @24c02, @polypixeldev
 - **PRs:** #10904 (follow + monthly email + home highlight), #11056 (Atom feeds), #11083 (monthly callout), #11073 (new block editor UI), #11146 (spending summary blocks)
@@ -281,8 +286,6 @@ These are real improvements users will notice, but aren't big enough to merit a 
 - **Member-role users can view check deposit images.** @garyhtou (#11473)
 
 ### Applications & onboarding
-- **Application unarchiving.** @polypixeldev (#13181)
-- **Onboarding videos embedded in the application flow.** @polypixeldev (#13324)
 - **URL parameter prefilling for sub-organization forms.** @Copilot (#11735)
 
 ### UI / polish
