@@ -15,6 +15,7 @@
 #  merchant_lock                     :string
 #  pre_authorization_required        :boolean          default(FALSE), not null
 #  reimbursement_conversions_enabled :boolean          default(TRUE), not null
+#  stripe_cards_enabled              :boolean          default(TRUE), not null
 #  support_message                   :string
 #  support_url                       :string
 #  created_at                        :datetime         not null

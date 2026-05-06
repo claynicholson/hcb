@@ -45,6 +45,26 @@
           </span>
         <% end %>
       </div>
+
+      <div class="field">
+        <%= form.label :stripe_cards_enabled, class: "flex gap-2 items-center" do %>
+          <%= form.check_box :stripe_cards_enabled, disabled:, checked: @event&.card_grant_setting&.stripe_cards_enabled? != false %>
+          Allow virtual card?
+          <span class="info tooltipped tooltipped--e h-5" aria-label="Recipient can activate a virtual debit card for this grant">
+            <%= inline_icon "info", size: 20 %>
+          </span>
+        <% end %>
+      </div>
+
+      <div class="field">
+        <%= form.label :reimbursement_reports_enabled, class: "flex gap-2 items-center" do %>
+          <%= form.check_box :reimbursement_reports_enabled, disabled:, checked: @event&.card_grant_setting&.reimbursement_conversions_enabled? != false %>
+          Allow reimbursement report?
+          <span class="info tooltipped tooltipped--e h-5" aria-label="Recipient can convert this grant into a reimbursement report">
+            <%= inline_icon "info", size: 20 %>
+          </span>
+        <% end %>
+      </div>
     </div>
 
     <div class="bg-muted self-stretch" style="width: 1px;"></div>

@@ -15,9 +15,11 @@
 #  invite_message             :string
 #  keyword_lock               :string
 #  merchant_lock              :string
-#  one_time_use               :boolean
-#  pre_authorization_required :boolean          default(FALSE), not null
-#  purpose                    :string
+#  one_time_use                   :boolean
+#  pre_authorization_required     :boolean          default(FALSE), not null
+#  purpose                        :string
+#  reimbursement_reports_enabled  :boolean
+#  stripe_cards_enabled           :boolean
 #  status                     :integer          default("active"), not null
 #  created_at                 :datetime         not null
 #  updated_at                 :datetime         not null
@@ -305,6 +307,16 @@ class CardGrant < ApplicationRecord
 
   def keyword_lock
     super || setting&.keyword_lock
+  end
+
+  def stripe_cards_enabled?
+    v = self[:stripe_cards_enabled]
+    v.nil? ? setting.stripe_cards_enabled? : v
+  end
+
+  def reimbursement_reports_enabled?
+    v = self[:reimbursement_reports_enabled]
+    v.nil? ? setting.reimbursement_conversions_enabled? : v
   end
 
   def default_expiration_at

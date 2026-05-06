@@ -476,6 +476,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_30_044254) do
     t.string "merchant_lock"
     t.boolean "pre_authorization_required", default: false, null: false
     t.boolean "reimbursement_conversions_enabled", default: true, null: false
+    t.boolean "stripe_cards_enabled", default: true, null: false
     t.string "support_message"
     t.string "support_url"
     t.datetime "updated_at", null: false
@@ -499,6 +500,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_04_30_044254) do
     t.boolean "one_time_use"
     t.boolean "pre_authorization_required", default: false, null: false
     t.string "purpose"
+    t.boolean "reimbursement_reports_enabled"
+    t.boolean "stripe_cards_enabled"
     t.bigint "sent_by_id", null: false
     t.integer "status", default: 0, null: false
     t.bigint "stripe_card_id"

@@ -1144,6 +1144,7 @@ class EventsController < ApplicationController
           :reimbursement_conversions_enabled,
           :pre_authorization_required,
           :block_suspected_fraud,
+          :stripe_cards_enabled,
           :support_message,
           :support_url
         ],
@@ -1207,6 +1208,7 @@ class EventsController < ApplicationController
         :reimbursement_conversions_enabled,
         :pre_authorization_required,
         :block_suspected_fraud,
+        :stripe_cards_enabled,
         :support_message,
         :support_url
       ],
