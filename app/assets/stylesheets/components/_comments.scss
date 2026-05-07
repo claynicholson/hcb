@@ -22,6 +22,18 @@
 .comments .autolink {
 }
 
+.comments blockquote {
+  margin: 0.5rem 0;
+  padding: 0.25rem 0.75rem;
+  color: map-get($palette, slate);
+  border-left: 0.25rem solid map-get($palette, smoke-dark);
+
+  html[data-dark='true'] & {
+    color: $muted;
+    border-left-color: $darkless;
+  }
+}
+
 .comments .card p:first-child {
   margin-top: 0;
 }
