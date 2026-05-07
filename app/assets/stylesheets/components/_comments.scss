@@ -40,6 +40,13 @@
   );
 }
 
+.comment--container blockquote {
+  border-left: 3px solid $smoke-dark;
+  color: map-get($palette, muted);
+  margin: 0 0 1rem 0;
+  padding: 0 0.75rem;
+}
+
 .mention-suggestions {
   min-width: 180px !important;
   padding: 0px;
