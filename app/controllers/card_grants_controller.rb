@@ -243,11 +243,6 @@ class CardGrantsController < ApplicationController
   def activate
     authorize @card_grant
 
-    unless @card_grant.allow_stripe_card?
-      redirect_to @card_grant, flash: { error: "Virtual card activation is not allowed for this grant." }
-      return
-    end
-
     @card_grant.create_stripe_card(request.remote_ip)
 
     redirect_to @card_grant
@@ -258,12 +253,7 @@ class CardGrantsController < ApplicationController
   end
 
   def accept_as_reimbursement
-    authorize @card_grant, :convert_to_reimbursement_report?
-
-    unless @card_grant.allow_reimbursement_report?
-      redirect_to @card_grant, flash: { error: "Reimbursement report acceptance is not allowed for this grant." }
-      return
-    end
+    authorize @card_grant
 
     report = @card_grant.convert_to_reimbursement_report!
 
